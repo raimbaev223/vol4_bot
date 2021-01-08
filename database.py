@@ -22,14 +22,13 @@ class Data:
             return self.cursor.execute("SELECT * FROM 'users'").fetchall()
 
     def add_user(self, user_id, first_name, phone):
-        with self.connection:
-            return self.cursor.execute(
-                f"INSERT INTO 'users' ('user_id', 'first_name', 'phone') VALUES(?, ?, ?)", (user_id, first_name, phone)
-            )
+        try:
+            with self.connection:
+                return self.cursor.execute(
+                    f"INSERT INTO 'users' ('user_id', 'first_name', 'phone') VALUES(?, ?, ?)", (user_id, first_name, phone)
+                )
+        except Exception as ex:
+            print(ex)
 
     def close(self):
         self.connection.close()
-
-db = Data('db.db')
-db.create_db()
-print(db.get_users())
