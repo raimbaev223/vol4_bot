@@ -12,7 +12,7 @@ from buttons import *
 from classes import User, Form
 from database import Data
 from config import *
-from parse import list_news
+from parse import list_news, list_weather
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=TOKEN)
@@ -84,10 +84,15 @@ async def admin_func(query: types.CallbackQuery, state: FSMContext):
 
 
 @dp.callback_query_handler(text='news', state=Form.news)
+@dp.callback_query_handler(text='weather', state=Form.news)
 async def news_func(query: types.CallbackQuery, state: FSMContext):
-    text = list_news.pop()
-    await bot.send_message(query.from_user.id, text, reply_markup=next_btn)
-    await Form.one_news.set()
+    if query.data == 'news':
+        text = list_news.pop()
+        await bot.send_message(query.from_user.id, text, reply_markup=next_btn)
+        await Form.one_news.set()
+    elif query.data == 'weather':
+        text = f'Погода в Бишкеке {list_weather[0]} градусов, {list_weather[1]}'
+        await bot.send_message(query.from_user.id, text, reply_markup=next_btn)
 
 
 @dp.message_handler(content_types=types.ContentTypes.TEXT, state=Form.one_news)

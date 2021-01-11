@@ -4,7 +4,8 @@ start_ = InlineKeyboardButton('Начать', callback_data='starting')
 start_btn = InlineKeyboardMarkup().add(start_)
 
 news = InlineKeyboardButton('Новости', callback_data='news')
-news_btn = InlineKeyboardMarkup().add(news)
+weather = InlineKeyboardButton('Погода', callback_data='weather')
+news_btn = InlineKeyboardMarkup().add(news, weather)
 
 registration = InlineKeyboardButton("Регистрация", callback_data='reg')
 info = InlineKeyboardButton("Подробнее", callback_data='info')
