@@ -12,7 +12,7 @@ from buttons import *
 from classes import User, Form
 from database import Data
 from config import *
-
+from parse import list_news
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=TOKEN)
@@ -21,7 +21,7 @@ dp = Dispatcher(bot, storage=storage)
 new_user = {}
 database = Data("db.db")
 Data.create_db(database)
-
+list_news.reverse()
 
 @dp.message_handler(commands=['start'])
 async def hello(msg: types.Message):
@@ -31,7 +31,6 @@ async def hello(msg: types.Message):
     else:
         await bot.send_message(msg.from_user.id, f"Hello {msg.from_user.first_name}!", reply_markup=start_btn)
         await Form.starting.set()
-        print(msg)
 
 
 @dp.callback_query_handler(text='starting', state=Form.starting)
@@ -40,15 +39,14 @@ async def start_func(query: types.CallbackQuery, state: FSMContext):
     new_user[user_id] = User(user_id)
     id_ = new_user[user_id]
     id_.first_name = query.from_user.first_name
-
-    if user_id not in database.get_users():
-        await bot.send_message(user_id, "Нужно зарегестрироваться", reply_markup=reg_btns)
-        await Form.first_step.set()
-    else:
-        for i in range(len(database.get_users())):
-            if user_id == database.get_users()[i][0]:
-                await bot.send_message(user_id, "Вы уже зарегестрированы")
-
+    all_users = database.get_users()
+    for i in all_users:
+        if user_id not in i:
+            await bot.send_message(user_id, "Нужно зарегестрироваться", reply_markup=reg_btns)
+            await Form.first_step.set()
+        else:
+            await bot.send_message(user_id, "Вы уже зарегестрированы", reply_markup=news_btn)
+            await Form.news.set()
 
 
 @dp.callback_query_handler(text='reg', state=Form.first_step)
@@ -84,5 +82,18 @@ async def admin_func(query: types.CallbackQuery, state: FSMContext):
             await bot.send_message(admin, msg)
             time.sleep(1)
 
+
+@dp.callback_query_handler(text='news', state=Form.news)
+async def news_func(query: types.CallbackQuery, state: FSMContext):
+    text = list_news.pop()
+    await bot.send_message(query.from_user.id, text, reply_markup=next_btn)
+    await Form.one_news.set()
+
+
+@dp.message_handler(content_types=types.ContentTypes.TEXT, state=Form.one_news)
+async def next_news(msg: types.Message, state: FSMContext):
+    if msg.text == 'Следующая новость':
+        text = list_news.pop()
+        await bot.send_message(msg.from_user.id, text)
 
 executor.start_polling(dp, skip_updates=True)

@@ -11,3 +11,5 @@ class Form(StatesGroup):
     first_step = State()
     second_step = State()
     admin_step = State()
+    news = State()
+    one_news = State()

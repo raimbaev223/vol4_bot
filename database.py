@@ -30,5 +30,14 @@ class Data:
         except Exception as ex:
             print(ex)
 
+    def update_user(self, user_id, phone):
+        with self.connection:
+            return self.cursor.execute(f"UPDATE 'users' SET 'phone'=? WHERE 'user_id'=?",(phone, user_id))
+
+    def delete_user(self, user_id):
+        with self.connection:
+            return self.cursor.execute(f"DELETE FROM 'users' WHERE 'user_id'=?",(user_id,))
+    
     def close(self):
         self.connection.close()
+
